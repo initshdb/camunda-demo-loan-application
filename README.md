@@ -1,11 +1,18 @@
 # Camunda Loan Application Process
 
-## BPMN
-![](docs/Loan_Application_Process_BPMN.png)
+## BPMN Diagram
+![BPMN Diagram](docs/Loan_Application_Process_BPMN.png)
 
-## Demo
-A short demo of the Loan Application process showing scenarios of 
-1. Auto Approval for Loan Amount < 1000:
-2. Loan Review for amount > 1000 with Approved and with manager escalation every 1 minute until the review task is completed
-3. Loan Review for amount > 1000 with Rejection
-![](docs/Loan_Application_Process_Demo.mp4)
+## Demo Video
+A short demo of the Loan Application process covering multiple scenarios.  
+[📥 Demo Video](docs/Loan_Application_Process_Demo.mp4)
+
+### Scenarios Demonstrated
+1. **Auto Approval** – Loan amount **< 1000**  
+   ⏱ **Time:** 0:00 – 0:40
+
+2. **Loan Review** – Loan amount **> 1000**, **approved** with **manager escalation** every 1 minute until review task is completed  
+   ⏱ **Time:** 0:40 – 3:50
+
+3. **Loan Review** – Loan amount **> 1000**, **rejected**  
+   ⏱ **Time:** 3:50 – END
