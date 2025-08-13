@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1wisflu" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.37.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.23.0">
+  <bpmn:process id="LOAN_APPLICATION_PROCESS" name="Loan Application Process" isExecutable="true" camunda:versionTag="1.0.0" camunda:historyTimeToLive="365">
+    <bpmn:startEvent id="StartEvent_1" name="Customer submits loan application" camunda:formKey="embedded:app:forms/loanApplication.html">
+      <bpmn:outgoing>Flow_17oe989</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_0qoq3wm">
+      <bpmn:incoming>Flow_18msnt8</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ao4nxf</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1t1m1wy</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_18msnt8" sourceRef="Activity_0bqooyg" targetRef="Gateway_0qoq3wm" />
+    <bpmn:endEvent id="Event_03m86tt" name="Loan Applicaton Completed">
+      <bpmn:incoming>Flow_1kw2v9j</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1kw2v9j" sourceRef="Activity_0t3qncl" targetRef="Event_03m86tt" />
+    <bpmn:userTask id="Activity_1bd6ozg" name="Loan Review" camunda:asyncBefore="true" camunda:formKey="embedded:app:forms/loanReview.html" camunda:candidateUsers="demo" camunda:candidateGroups="">
+      <bpmn:extensionElements>
+        <camunda:taskListener delegateExpression="${notificationService}" event="create" id="" />
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationMessage">Loan Application ${loanApplicationId} from ${applicantName} for amount ${loanAmount} has been received for review</camunda:inputParameter>
+          <camunda:inputParameter name="notificationSubject">Loan Officer: Review Loan Application</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ao4nxf</bpmn:incoming>
+      <bpmn:outgoing>Flow_06u7zws</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1ao4nxf" name="Review required" sourceRef="Gateway_0qoq3wm" targetRef="Activity_1bd6ozg">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${loanAmount &gt; 1000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_0vm97p9" name="Update Loan Application Status" camunda:asyncBefore="true" camunda:expression="#{loanApplicationCamundaService.updateLoanApplicationStatus(execution)}">
+      <bpmn:incoming>Flow_06u7zws</bpmn:incoming>
+      <bpmn:incoming>Flow_0tm5u5j</bpmn:incoming>
+      <bpmn:outgoing>Flow_09fk10k</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_0ydl5a0">
+        <bpmn:targetRef>DataStoreReference_1b6ur66</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1t1m1wy" name="Auto approve" sourceRef="Gateway_0qoq3wm" targetRef="Activity_11w2hv8">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${loanAmount &lt;= 1000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_09fk10k" sourceRef="Activity_0vm97p9" targetRef="Activity_0t3qncl" />
+    <bpmn:sequenceFlow id="Flow_06u7zws" sourceRef="Activity_1bd6ozg" targetRef="Activity_0vm97p9" />
+    <bpmn:boundaryEvent id="Event_09423iw" name="10 mins" cancelActivity="false" attachedToRef="Activity_1bd6ozg">
+      <bpmn:outgoing>Flow_0xb7sev</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_16v6lta">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT1M</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_0xb7sev" sourceRef="Event_09423iw" targetRef="Activity_1ov274k" />
+    <bpmn:endEvent id="Event_1xj0viv">
+      <bpmn:incoming>Flow_02oq23t</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_02oq23t" sourceRef="Activity_1ov274k" targetRef="Event_1xj0viv" />
+    <bpmn:sendTask id="Activity_0bqooyg" name="Notify Manager" camunda:asyncBefore="true" camunda:delegateExpression="#{notificationService}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationMessage">A new loan application ${loanApplicationId} is received from ${applicantName} for amount ${loanAmount}</camunda:inputParameter>
+          <camunda:inputParameter name="recipient">demo</camunda:inputParameter>
+          <camunda:inputParameter name="notificationSubject">Manager Notification: New Loan Application</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1vj28lm</bpmn:incoming>
+      <bpmn:outgoing>Flow_18msnt8</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="Activity_0t3qncl" name="Notify Customer" camunda:asyncBefore="true" camunda:delegateExpression="#{notificationService}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationMessage">Dear ${applicantName}, Your loan application ${loanApplicationId} for amount ${loanAmount} has been ${loanStatus}</camunda:inputParameter>
+          <camunda:inputParameter name="recipient">${applicantEmailId}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationSubject">Customer Update: Loan Process Completed</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_09fk10k</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kw2v9j</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="Activity_1ov274k" name="Escalate to manager" camunda:delegateExpression="#{notificationService}">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationMessage">Loan application ${loanApplicationId} for ${applicantName} for amount ${loanAmount} has not been reviewed yet.</camunda:inputParameter>
+          <camunda:inputParameter name="recipient">demo</camunda:inputParameter>
+          <camunda:inputParameter name="notificationSubject">Escalation to Manager</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0xb7sev</bpmn:incoming>
+      <bpmn:outgoing>Flow_02oq23t</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:scriptTask id="Activity_11w2hv8" name="Auto Approve Loan" scriptFormat="groovy">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_1t1m1wy</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tm5u5j</bpmn:outgoing>
+      <bpmn:script>execution.setVariable('loanStatus', 'APPROVED')
+execution.setVariable('loanStatusReason', 'Amount less than 1000 are auto approved');</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0tm5u5j" sourceRef="Activity_11w2hv8" targetRef="Activity_0vm97p9" />
+    <bpmn:sequenceFlow id="Flow_17oe989" sourceRef="StartEvent_1" targetRef="Activity_00n10x5" />
+    <bpmn:sequenceFlow id="Flow_1vj28lm" sourceRef="Activity_00n10x5" targetRef="Activity_0bqooyg" />
+    <bpmn:serviceTask id="Activity_00n10x5" name="Create Loan Application Entry" camunda:expression="#{loanApplicationCamundaService.registerLoanApplication(execution)}">
+      <bpmn:incoming>Flow_17oe989</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vj28lm</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_16j5qje">
+        <bpmn:targetRef>DataStoreReference_19rpmq9</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:dataStoreReference id="DataStoreReference_19rpmq9" name="Loan Application DB" />
+    <bpmn:dataStoreReference id="DataStoreReference_1b6ur66" name="Loan Application DB" />
+    <bpmn:textAnnotation id="TextAnnotation_0ey347a">
+      <bpmn:text>Send a mail to the manager of a new loan application</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0qpdkqb" associationDirection="None" sourceRef="Activity_0bqooyg" targetRef="TextAnnotation_0ey347a" />
+    <bpmn:textAnnotation id="TextAnnotation_0qji2pc">
+      <bpmn:text>If loanAmount &gt; 1000 then a manual review by loan officer is needed</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1is5sjp" associationDirection="None" sourceRef="Flow_1ao4nxf" targetRef="TextAnnotation_0qji2pc" />
+    <bpmn:textAnnotation id="TextAnnotation_1ohme4i">
+      <bpmn:text>Auto approval of loan if the amount is below 1000</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1f9owty" associationDirection="None" sourceRef="Flow_1t1m1wy" targetRef="TextAnnotation_1ohme4i" />
+    <bpmn:textAnnotation id="TextAnnotation_0hx67du">
+      <bpmn:text>Update Loan status (APPROVED or REJECTED)  to the database</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0knms3b" associationDirection="None" sourceRef="Activity_0vm97p9" targetRef="TextAnnotation_0hx67du" />
+    <bpmn:textAnnotation id="TextAnnotation_057v2fa">
+      <bpmn:text>Notify customer about the loan approval status</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_018jbzt" associationDirection="None" sourceRef="Activity_0t3qncl" targetRef="TextAnnotation_057v2fa" />
+    <bpmn:textAnnotation id="TextAnnotation_04xe5s1">
+      <bpmn:text>Loan officer manually reviews the loan application</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1woff97" associationDirection="None" sourceRef="Activity_1bd6ozg" targetRef="TextAnnotation_04xe5s1" />
+    <bpmn:textAnnotation id="TextAnnotation_0z1wp7g">
+      <bpmn:text>Escalate to the manager every 10 minutes, if the loan is not yet reviewed</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_085vagg" associationDirection="None" sourceRef="Event_09423iw" targetRef="TextAnnotation_0z1wp7g" />
+    <bpmn:textAnnotation id="TextAnnotation_0kae8r6">
+      <bpmn:text>Escalation sent to the manager if the loan review takes more than 10 minutes</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_040u3be" associationDirection="None" sourceRef="Activity_1ov274k" targetRef="TextAnnotation_0kae8r6" />
+    <bpmn:textAnnotation id="TextAnnotation_1ccyxfa">
+      <bpmn:text>Escalation path ends</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_06vl60h" associationDirection="None" sourceRef="Event_1xj0viv" targetRef="TextAnnotation_1ccyxfa" />
+    <bpmn:textAnnotation id="TextAnnotation_0u5muop">
+      <bpmn:text>Sets loan as approved</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1gc5od5" associationDirection="None" sourceRef="Activity_11w2hv8" targetRef="TextAnnotation_0u5muop" />
+    <bpmn:textAnnotation id="TextAnnotation_0vc1140">
+      <bpmn:text>Loan Application is saved</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_08hmtoh" associationDirection="None" sourceRef="Activity_00n10x5" targetRef="TextAnnotation_0vc1140" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="LOAN_APPLICATION_PROCESS">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="158" y="285" width="89" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0qoq3wm_di" bpmnElement="Gateway_0qoq3wm" isMarkerVisible="true">
+        <dc:Bounds x="675" y="235" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_03m86tt_di" bpmnElement="Event_03m86tt">
+        <dc:Bounds x="1422" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1402" y="285" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1bd6ozg_di" bpmnElement="Activity_1bd6ozg">
+        <dc:Bounds x="830" y="380" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0vm97p9_di" bpmnElement="Activity_0vm97p9">
+        <dc:Bounds x="1020" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fc6iqs_di" bpmnElement="Activity_0bqooyg">
+        <dc:Bounds x="500" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0xfx66k_di" bpmnElement="Activity_0t3qncl">
+        <dc:Bounds x="1230" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11w2hv8_di" bpmnElement="Activity_11w2hv8">
+        <dc:Bounds x="830" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1rgtqp2_di" bpmnElement="Activity_00n10x5">
+        <dc:Bounds x="300" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0znzg5x_di" bpmnElement="Activity_1ov274k">
+        <dc:Bounds x="1020" y="460" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1xj0viv_di" bpmnElement="Event_1xj0viv">
+        <dc:Bounds x="1182" y="482" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0029oqd" bpmnElement="DataStoreReference_1b6ur66">
+        <dc:Bounds x="1405" y="384" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1389" y="441" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_19rpmq9_di" bpmnElement="DataStoreReference_19rpmq9">
+        <dc:Bounds x="330" y="425" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="314" y="482" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1f9owty_di" bpmnElement="Association_1f9owty">
+        <di:waypoint x="778" y="260" />
+        <di:waypoint x="791" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_06vl60h_di" bpmnElement="Association_06vl60h">
+        <di:waypoint x="1218" y="499" />
+        <di:waypoint x="1250" y="498" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_040u3be_di" bpmnElement="Association_040u3be">
+        <di:waypoint x="1106" y="460" />
+        <di:waypoint x="1130" y="433" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_08hmtoh_di" bpmnElement="Association_08hmtoh">
+        <di:waypoint x="374" y="220" />
+        <di:waypoint x="406" y="164" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0ey347a_di" bpmnElement="TextAnnotation_0ey347a">
+        <dc:Bounds x="520" y="130" width="100" height="70" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0qji2pc_di" bpmnElement="TextAnnotation_0qji2pc">
+        <dc:Bounds x="530" y="335" width="130" height="74" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0hx67du_di" bpmnElement="TextAnnotation_0hx67du">
+        <dc:Bounds x="1070" y="80" width="100" height="84" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_057v2fa_di" bpmnElement="TextAnnotation_057v2fa">
+        <dc:Bounds x="1330" y="140" width="100" height="53" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_04xe5s1_di" bpmnElement="TextAnnotation_04xe5s1">
+        <dc:Bounds x="580" y="465" width="100" height="70" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0z1wp7g_di" bpmnElement="TextAnnotation_0z1wp7g">
+        <dc:Bounds x="750" y="498" width="100" height="82" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0u5muop_di" bpmnElement="TextAnnotation_0u5muop">
+        <dc:Bounds x="930" y="140" width="100" height="41" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09423iw_di" bpmnElement="Event_09423iw">
+        <dc:Bounds x="872" y="442" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="910" y="473" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_18msnt8_di" bpmnElement="Flow_18msnt8">
+        <di:waypoint x="600" y="260" />
+        <di:waypoint x="675" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kw2v9j_di" bpmnElement="Flow_1kw2v9j">
+        <di:waypoint x="1330" y="260" />
+        <di:waypoint x="1422" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ao4nxf_di" bpmnElement="Flow_1ao4nxf">
+        <di:waypoint x="700" y="285" />
+        <di:waypoint x="700" y="420" />
+        <di:waypoint x="830" y="420" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="710" y="333" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t1m1wy_di" bpmnElement="Flow_1t1m1wy">
+        <di:waypoint x="725" y="260" />
+        <di:waypoint x="830" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="733" y="263" width="66" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09fk10k_di" bpmnElement="Flow_09fk10k">
+        <di:waypoint x="1120" y="260" />
+        <di:waypoint x="1230" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06u7zws_di" bpmnElement="Flow_06u7zws">
+        <di:waypoint x="930" y="420" />
+        <di:waypoint x="1070" y="420" />
+        <di:waypoint x="1070" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xb7sev_di" bpmnElement="Flow_0xb7sev">
+        <di:waypoint x="890" y="478" />
+        <di:waypoint x="890" y="500" />
+        <di:waypoint x="1020" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02oq23t_di" bpmnElement="Flow_02oq23t">
+        <di:waypoint x="1120" y="500" />
+        <di:waypoint x="1182" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tm5u5j_di" bpmnElement="Flow_0tm5u5j">
+        <di:waypoint x="930" y="260" />
+        <di:waypoint x="1020" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17oe989_di" bpmnElement="Flow_17oe989">
+        <di:waypoint x="218" y="260" />
+        <di:waypoint x="300" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vj28lm_di" bpmnElement="Flow_1vj28lm">
+        <di:waypoint x="400" y="260" />
+        <di:waypoint x="500" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0qpdkqb_di" bpmnElement="Association_0qpdkqb">
+        <di:waypoint x="557" y="220" />
+        <di:waypoint x="560" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1is5sjp_di" bpmnElement="Association_1is5sjp">
+        <di:waypoint x="700" y="350" />
+        <di:waypoint x="660" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0knms3b_di" bpmnElement="Association_0knms3b">
+        <di:waypoint x="1080" y="220" />
+        <di:waypoint x="1094" y="164" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_018jbzt_di" bpmnElement="Association_018jbzt">
+        <di:waypoint x="1318" y="220" />
+        <di:waypoint x="1344" y="193" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1woff97_di" bpmnElement="Association_1woff97">
+        <di:waypoint x="830" y="432" />
+        <di:waypoint x="680" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_085vagg_di" bpmnElement="Association_085vagg">
+        <di:waypoint x="875" y="470" />
+        <di:waypoint x="826" y="498" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1gc5od5_di" bpmnElement="Association_1gc5od5">
+        <di:waypoint x="918" y="220" />
+        <di:waypoint x="955" y="181" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_1ohme4i_di" bpmnElement="TextAnnotation_1ohme4i">
+        <dc:Bounds x="750" y="130" width="100" height="70" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1ccyxfa_di" bpmnElement="TextAnnotation_1ccyxfa">
+        <dc:Bounds x="1250" y="479" width="100" height="41" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0kae8r6_di" bpmnElement="TextAnnotation_0kae8r6">
+        <dc:Bounds x="1130" y="360" width="100" height="98" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0vc1140_di" bpmnElement="TextAnnotation_0vc1140">
+        <dc:Bounds x="380" y="109" width="100" height="55" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_16j5qje_di" bpmnElement="DataOutputAssociation_16j5qje">
+        <di:waypoint x="350" y="300" />
+        <di:waypoint x="350" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_0ydl5a0_di" bpmnElement="DataOutputAssociation_0ydl5a0">
+        <di:waypoint x="1120" y="281" />
+        <di:waypoint x="1405" y="403" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

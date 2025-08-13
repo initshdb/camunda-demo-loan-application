@@ -1,0 +1,43 @@
+<h1>Loan Application Review Form</h1>
+
+<form role="form" class="form-horizontal">
+    <div class="control-group">
+        <label class="control-label">Applicant Name</label>
+        <div class="controls">
+            <input type="text" class="form-control"
+                   cam-variable-name="applicantName"
+                   cam-variable-type="String"
+                   disabled
+            />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Loan Amount</label>
+        <div class="controls">
+            <input type="number" class="form-control"
+                   cam-variable-name="loanAmount"
+                   cam-variable-type="Double"
+                   disabled
+            />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Approve</label>
+        <div class="controls">
+            <select cam-variable-name="loanStatus"
+                    cam-variable-type="String">
+                <option value="APPROVED">Yes</option>
+                <option value="REJECTED">No</option>
+            </select>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Reason</label>
+        <div class="controls">
+            <input type="text" class="form-control"
+                   cam-variable-name="loanStatusReason"
+                   cam-variable-type="String"
+            />
+        </div>
+    </div>
+</form>
