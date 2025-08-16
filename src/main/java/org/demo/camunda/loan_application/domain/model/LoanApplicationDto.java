@@ -76,6 +76,7 @@ public class LoanApplicationDto {
         dto.setApplicantEmailId(entity.getApplicantEmailId());
 		dto.setAmount(entity.getAmount());
         dto.setStatus(entity.getStatus());
+		dto.setStatusReason(entity.getStatusReason());
 
         return dto;
     }

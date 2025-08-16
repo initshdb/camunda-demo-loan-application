@@ -32,6 +32,7 @@ public class LoanApplicationCamundaService {
 		Double loanAmount = (Double) execution.getVariable("loanAmount");
 
 		LoanApplicationDto loanApplication = new LoanApplicationDto();
+		loanApplication.setId(execution.getProcessInstanceId());
 		loanApplication.setApplicantName(applicantName);
 		loanApplication.setApplicantEmailId(applicantEmailId);
 		loanApplication.setAmount(loanAmount);

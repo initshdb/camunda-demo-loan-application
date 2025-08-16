@@ -5,7 +5,9 @@ import org.demo.camunda.loan_application.domain.db.repository.LoanApplicationRep
 import org.demo.camunda.loan_application.domain.model.LoanApplicationDto;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Loan Application Service to handle CRUD operations
@@ -32,6 +34,11 @@ public class LoanApplicationService {
 		return loanApplication.map(LoanApplicationDto::fromEntity)
 							  .orElseThrow(() -> new RuntimeException(String.format("Loan Application %s does not exist",
 																					id)));
+	}
+
+	public List<LoanApplicationDto> fetchLoanApplications() {
+		List<LoanApplication> loanApplications = loanApplicationRepository.findAll();
+		return loanApplications.stream().map(LoanApplicationDto::fromEntity).toList();
 	}
 
 }

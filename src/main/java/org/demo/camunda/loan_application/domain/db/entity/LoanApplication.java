@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 public class LoanApplication {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
+//	@GeneratedValue(strategy = GenerationType.AUTO)
+//	@Column(nullable = false)
 	private String id;
 
 	@Column(name = "applicant_name", nullable = false)

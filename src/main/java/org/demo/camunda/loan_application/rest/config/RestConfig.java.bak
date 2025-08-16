@@ -1,0 +1,16 @@
+//package org.demo.camunda.loan_application.rest.config;
+//
+//import jakarta.ws.rs.ApplicationPath;
+//import org.camunda.bpm.spring.boot.starter.rest.CamundaJerseyResourceConfig;
+//import org.springframework.stereotype.Component;
+//
+//@Component
+//@ApplicationPath("/api/loan-app")
+//public class RestConfig extends CamundaJerseyResourceConfig {
+//
+//	@Override
+//	protected void registerAdditionalResources() {
+//		register();
+//	}
+//
+//}

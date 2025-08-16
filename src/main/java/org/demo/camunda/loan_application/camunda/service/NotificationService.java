@@ -7,7 +7,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.identity.User;
 import org.camunda.bpm.engine.task.IdentityLink;
-import org.demo.camunda.loan_application.service.EmailService;
+import org.demo.camunda.loan_application.shared.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
