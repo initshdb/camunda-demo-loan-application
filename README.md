@@ -7,14 +7,12 @@
 
 ## Demo 
 A short demo of the Loan Application process covering multiple scenarios.  
-[📥 Demo Video](docs/Loan_Application_Process_Demo.mp4)
+- [📥 Angular Forms](docs/Angular_Loan_Application_Process_Demo.mp4)
+- [📥 Embedded Forms](docs/Loan_Application_Process_Demo.mp4)
 
 ### Scenarios Demonstrated
-1. **Auto Approval** – Loan amount **< 1000**  
-   ⏱ **Time:** 0:00 – 0:40
+1. **Auto Approval** – Loan amount **<= 1000**  
 
 2. **Loan Review** – Loan amount **> 1000**, **approved** with **manager escalation** every 1 minute (for demo) until review task is completed  
-   ⏱ **Time:** 0:40 – 3:50
 
 3. **Loan Review** – Loan amount **> 1000**, **rejected**  
-   ⏱ **Time:** 3:50 – END
